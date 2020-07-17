@@ -1,6 +1,6 @@
 {
   "name": "@klathmon/qmk-hid-display",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "A small node script that will communicate with a qmk keyboard over raw hid",
   "main": "index.js",
   "bin": {
@@ -19,7 +19,7 @@
   "dependencies": {
     "battery-level": "^3.0.0",
     "loudness": "^0.3.0",
-    "node-hid": "^1.1.0",
+    "node-hid": "^1.3.0",
     "os-utils": "0.0.14",
     "request": "^2.88.0"
   },
