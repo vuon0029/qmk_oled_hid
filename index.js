@@ -4,6 +4,17 @@
 const hid = require('node-hid');
 const os = require('os-utils')
 const request = require('request');
+const batteryLevel = require('battery-level');
+const loudness = require('loudness')
+
+// the node-audio-windows version is much faster on windows, but loudness handles other os's better, so let's get the best of both worlds
+let winAudio
+try {
+  winAudio = require('node-audio-windows').volume
+} catch (err) {
+  // do nothing
+}
+
 
 // Keyboard info
 const KEYBOARD_NAME = "Lily58";
@@ -31,11 +42,23 @@ function wait(ms) {
 
 async function startPerfMonitor() {
   while (true) {
+      const [
+        cpuUsagePercent,
+        usedMemoryPercent,
+        volumeLevelPercent,
+        batteryPercent,
+      ] = await Promise.all([
+        new Promise((resolve) => os.cpuUsage((usage) => resolve(usage * 100))),
+        100 - (os.freememPercentage() * 100),
+        (os.platform() === 'darwin' ? loudness.getVolume() : winAudio.getVolume() * 100),
+        (await batteryLevel()) * 100,
+      ])
+
     const screen = [
-      ['CPU:', await new Promise((resolve) => os.cpuUsage((usage) => resolve(usage * 100)))],
-      ['    ', 0],
-      ['    ', 0],
-      ['RAM:', (os.freemem() / os.totalmem()) * 100],
+      ['CPU:', cpuUsagePercent],
+      ['RAM:', usedMemoryPercent],
+      ['VOL:', volumeLevelPercent],
+      ['BAT:', batteryPercent],
     ]
 
     const maxTitleSize = Math.max(...screen.map(([header]) => header.length))
@@ -54,6 +77,7 @@ async function startPerfMonitor() {
 async function startStockMonitor() {
     // Set the stocks that we want to show
     const stocks = new Map();
+    let counter = 0;
     stocks.set('MSFT', 0);
     stocks.set('TSLA', 0);
     stocks.set('GOOG', 0);
@@ -87,7 +111,10 @@ async function startStockMonitor() {
     // Just keep updating the data forever
     while (true) {
         // Get the current stock prices
-        await getStocks();
+        if (counter % 10 === 0) {
+            await getStocks();
+        }
+        counter++;
 
         // Create a screen using the stock data
         const lines = [];

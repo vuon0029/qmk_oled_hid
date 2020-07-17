@@ -17,8 +17,13 @@
   "homepage": "https://github.com/Klathmon/qmk-hid-display",
   "repository": "https://github.com/Klathmon/qmk-hid-display",
   "dependencies": {
+    "battery-level": "^3.0.0",
+    "loudness": "^0.3.0",
     "node-hid": "^1.1.0",
     "os-utils": "0.0.14",
     "request": "^2.88.0"
+  },
+  "optionalDependencies": {
+    "node-audio-windows": "^1.0.1"
   }
 }
